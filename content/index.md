@@ -26,4 +26,4 @@ Chào mừng đến với không gian lưu trữ các tài liệu nghiên cứu 
 
 Bảng dưới đây tự động liệt kê mọi bài viết có thẻ `#research`, mới nhất lên đầu (hoạt động cả trong Obsidian lẫn trên web).
 
-![[Research.base]]
+![[Danh sách bài nghiên cứu.base]]
