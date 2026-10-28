@@ -1,0 +1,24 @@
+filters:
+  and:
+    - file.ext == "md"
+    - file.hasTag("research")
+properties:
+  file.name:
+    displayName: Bài viết
+  note.date:
+    displayName: Ngày
+  note.topic:
+    displayName: Chủ đề
+  note.author:
+    displayName: Tác giả
+views:
+  - type: table
+    name: Bài nghiên cứu
+    order:
+      - file.name
+      - note.date
+      - note.topic
+      - note.author
+    sort:
+      - property: note.date
+        direction: DESC
