@@ -7,7 +7,7 @@ configuration:
   analytics:
     provider: plausible
   locale: en-US
-  baseUrl: quartz.jzhao.xyz
+  baseUrl: kieuanhdev.github.io/Research
   ignorePatterns:
     - private
     - templates
