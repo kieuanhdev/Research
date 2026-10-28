@@ -18,7 +18,18 @@ const REPO = path.resolve(import.meta.dirname, "..")
 const VAULT = path.resolve(process.env.VAULT ?? "/data/Workspace/Research")
 const CONTENT = path.join(REPO, "content")
 const MANIFEST = path.join(REPO, ".vault-sync.json")
-const ASSET_EXTS = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".pdf", ".md", ".html", ".mp4"])
+const ASSET_EXTS = new Set([
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".webp",
+  ".svg",
+  ".pdf",
+  ".md",
+  ".html",
+  ".mp4",
+])
 const SKIP_DIRS = new Set(["assets", "node_modules"])
 
 const args = new Set(process.argv.slice(2))
@@ -50,6 +61,40 @@ function referencedFiles(text) {
   return refs
 }
 
+// Turn citation markers like [16] into links to the matching row of the note's
+// "## Nguồn" table, e.g. [\[16\]](https://...). Code blocks and inline code are left alone.
+function linkCitations(text) {
+  const sources = new Map()
+  const section = text.match(/^## Nguồn\s*\n([\s\S]*?)(?=^## |(?![\s\S]))/m)
+  if (!section) return text
+  const table = section[1].match(/(?:^\|.*\n?)+/m)
+  for (const row of table ? table[0].split("\n") : []) {
+    const m = row.match(/^\|\s*(\d+)\s*\|.*?\]\((https?:\/\/[^)\s]+)\)/)
+    if (m) sources.set(m[1], m[2])
+  }
+  if (sources.size === 0) return text
+
+  let inFence = false
+  return text
+    .split("\n")
+    .map((line) => {
+      if (/^\s*(```|~~~)/.test(line)) inFence = !inFence
+      // skip fenced code and markdown reference definitions ("[1]: https://...")
+      if (inFence || /^\s*\[\d+\]:/.test(line)) return line
+      return line
+        .split(/(`[^`]*`)/)
+        .map((part, i) =>
+          i % 2
+            ? part
+            : part.replace(/(?<!\[)\[(\d+)((?:, [^\]\[]+)?)\](?![(\]])/g, (whole, n, label) =>
+                sources.has(n) ? `[\\[${n}${label}\\]](${sources.get(n)})` : whole,
+              ),
+        )
+        .join("")
+    })
+    .join("\n")
+}
+
 const toCopy = new Map() // relative path -> absolute source
 for (const note of walkNotes(VAULT)) {
   const text = fs.readFileSync(note, "utf8")
@@ -69,13 +114,15 @@ let changed = 0
 
 for (const [rel, src] of toCopy) {
   const dest = path.join(CONTENT, rel)
-  const same = fs.existsSync(dest) && fs.readFileSync(dest).equals(fs.readFileSync(src))
+  let data = fs.readFileSync(src)
+  if (rel.endsWith(".md")) data = Buffer.from(linkCitations(data.toString("utf8")))
+  const same = fs.existsSync(dest) && fs.readFileSync(dest).equals(data)
   if (same) continue
   console.log(`+ ${rel}`)
   changed++
   if (!dryRun) {
     fs.mkdirSync(path.dirname(dest), { recursive: true })
-    fs.copyFileSync(src, dest)
+    fs.writeFileSync(dest, data)
   }
 }
 
@@ -99,11 +146,17 @@ console.log(`\nSynced ${toCopy.size} file(s) from ${VAULT}, ${changed} change(s)
 if (push) {
   const git = (...a) => execFileSync("git", a, { cwd: REPO, stdio: "inherit" })
   git("add", "content", ".vault-sync.json")
-  const staged = execFileSync("git", ["diff", "--cached", "--name-only"], { cwd: REPO }).toString().trim()
+  const staged = execFileSync("git", ["diff", "--cached", "--name-only"], { cwd: REPO })
+    .toString()
+    .trim()
   if (!staged) {
     console.log("Nothing to commit.")
   } else {
-    git("commit", "-m", `[SYNC] Vault update ${new Date().toISOString().slice(0, 16).replace("T", " ")}`)
+    git(
+      "commit",
+      "-m",
+      `[SYNC] Vault update ${new Date().toISOString().slice(0, 16).replace("T", " ")}`,
+    )
     git("push")
   }
 }
