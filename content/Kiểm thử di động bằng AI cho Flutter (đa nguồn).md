@@ -364,4 +364,3 @@ Không tạo sản phẩm NotebookLM nào (không được yêu cầu). Có th�
 **Thời gian và tệp liên quan**
 - Thời gian chạy: khoảng 31 phút (bắt đầu 23:46 ngày 27/10, kết thúc 00:17 ngày 28/10). Phần trả lời 6 câu hỏi của NotebookLM chiếm khoảng 10 phút. Ngoài ra, vòng lặp chờ bị lỗi (`pgrep` khớp với chính nó) làm mất thêm khoảng 15 phút.
 - Lần chạy chỉ-YouTube trước đó vẫn được giữ nguyên tại [[AI-Driven Mobile Test Automation for Flutter]].
-- Toàn bộ hỏi đáp: [[assets/ai-mobile-testing-multisource/analysis-mapped.md]] (số trích dẫn đã đổi sang [n]).
