@@ -17,6 +17,8 @@ import { resolveFrame } from "./frames"
 import type { TreeTransform } from "../plugins/types"
 import type { BuildCtx } from "../util/ctx"
 
+const buildId = Date.now().toString(36)
+
 interface RenderComponents {
   head: QuartzComponent
   header: QuartzComponent[]
@@ -72,7 +74,9 @@ export function pageResources(
   })
 
   const contentIndexPath = joinSegments(baseDir, "static/contentIndex.json")
-  const contentIndexScript = `const fetchData = fetch("${contentIndexPath}").then(data => data.json())`
+  // cache-bust per build: hosts like GitHub Pages cache this file for 10 minutes,
+  // which left the explorer showing renamed/removed notes after a deploy
+  const contentIndexScript = `const fetchData = fetch("${contentIndexPath}?v=${buildId}").then(data => data.json())`
 
   const resources: StaticResources = {
     css: [
