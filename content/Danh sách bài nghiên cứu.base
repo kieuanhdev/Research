@@ -16,9 +16,9 @@ views:
     name: Bài nghiên cứu
     order:
       - file.name
-      - note.date
-      - note.topic
-      - note.author
+      - date
+      - topic
+      - author
     sort:
-      - property: note.date
+      - property: date
         direction: DESC
