@@ -13,7 +13,7 @@ Chào mừng đến với không gian lưu trữ các tài liệu nghiên cứu 
 
 ## 📌 Bài nghiên cứu mới nhất
 
-- [[2026-10-28 Quy trình làm video AI đồng nhất|Quy trình làm video AI đồng nhất]] — _Quy trình chuẩn hóa nhân vật, phong cách và ánh sáng trong sản xuất video AI._ (28/10/2026)
+- [[Quy trình làm video AI đồng nhất|Quy trình làm video AI đồng nhất]] — _Quy trình chuẩn hóa nhân vật, phong cách và ánh sáng trong sản xuất video AI._ (28/10/2026)
 
 ## 🗂️ Phân loại theo chủ đề
 
