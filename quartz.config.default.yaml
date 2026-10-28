@@ -205,6 +205,8 @@ plugins:
       links:
         GitHub: https://github.com/kieuanhdev
         Mã nguồn: https://github.com/kieuanhdev/Research
+        Facebook: https://www.facebook.com/Kieuanh.dev/
+        Email: mailto:kieuanh.dev@gmail.com
     layout:
       position: footer
       priority: 50
