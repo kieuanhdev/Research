@@ -312,4 +312,4 @@ Không tạo thêm deliverable NotebookLM (flashcards, mind map, audio). Có th�
   - **Đã sửa:** lời chê Sora trong [\[21\]](https://news.ycombinator.com/item?id=43536085) là về Sora bản đầu (2025), không phải Sora 2.
   - Fact-check trên trang chính thức ngày 28/10/2026: Kling Omni guide, Google Flow help (3 trang), ComfyUI Wan 2.2 docs, Runway API models và pricing, trang Seedance 2.0, Gemini API video docs. Trang help Gen-4 References của Runway trả 403. Trang giá của Kling không đọc được.
 - **Thời gian chạy:** khoảng 25 phút (07:57 → 08:22).
-- **Q&A đầy đủ:** [[assets/ai-video-workflow/analysis.md]] (bản gốc, citation đánh số theo từng câu trả lời) và [[assets/ai-video-workflow/analysis_mapped.md]] (đã đổi sang số nguồn [n] của báo cáo).
+- **Q&A đầy đủ:** [[assets/ai-video-workflow/analysis_mapped.md]] (số trích dẫn đã đổi sang số nguồn [n] của báo cáo).

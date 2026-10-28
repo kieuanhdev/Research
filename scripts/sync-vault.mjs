@@ -61,17 +61,21 @@ function referencedFiles(text) {
   return refs
 }
 
-// Turn citation markers like [16] into links to the matching row of the note's
-// "## Nguồn" table, e.g. [\[16\]](https://...). Code blocks and inline code are left alone.
-function linkCitations(text) {
+// Citation number -> URL, read from the first table of the note's "## Nguồn" section.
+function parseSources(text) {
   const sources = new Map()
   const section = text.match(/^## Nguồn\s*\n([\s\S]*?)(?=^## |(?![\s\S]))/m)
-  if (!section) return text
-  const table = section[1].match(/(?:^\|.*\n?)+/m)
+  const table = section?.[1].match(/(?:^\|.*\n?)+/m)
   for (const row of table ? table[0].split("\n") : []) {
     const m = row.match(/^\|\s*(\d+)\s*\|.*?\]\((https?:\/\/[^)\s]+)\)/)
     if (m) sources.set(m[1], m[2])
   }
+  return sources
+}
+
+// Turn citation markers like [16] into links to their source, e.g. [\[16\]](https://...).
+// Code blocks and inline code are left alone.
+function linkCitations(text, sources) {
   if (sources.size === 0) return text
 
   let inFence = false
@@ -95,16 +99,25 @@ function linkCitations(text) {
     .join("\n")
 }
 
-const toCopy = new Map() // relative path -> absolute source
+// Asset pages (e.g. the Q&A analysis) get a readable title and are hidden from
+// explorer/search/graph, but stay reachable through the note's link.
+function asAssetPage(text, noteName) {
+  const fm = `title: "Q&A đầy đủ – ${noteName.replace(/"/g, '\\"')}"\nunlisted: true\n`
+  return text.startsWith("---\n") ? `---\n${fm}${text.slice(4)}` : `---\n${fm}---\n\n${text}`
+}
+
+const toCopy = new Map() // relative path -> { src, sources, parent }
 for (const note of walkNotes(VAULT)) {
   const text = fs.readFileSync(note, "utf8")
   if (!isShared(text)) continue
-  toCopy.set(path.relative(VAULT, note), note)
+  const sources = parseSources(text)
+  const parent = path.basename(note, ".md")
+  toCopy.set(path.relative(VAULT, note), { src: note, sources })
   for (const ref of referencedFiles(text)) {
     const src = path.join(VAULT, ref)
     const isBase = ref.endsWith(".base")
     if (!isBase && !ASSET_EXTS.has(path.extname(ref).toLowerCase())) continue
-    if (fs.existsSync(src) && fs.statSync(src).isFile()) toCopy.set(ref, src)
+    if (fs.existsSync(src) && fs.statSync(src).isFile()) toCopy.set(ref, { src, sources, parent })
     else console.warn(`! missing: ${ref} (referenced by ${path.relative(VAULT, note)})`)
   }
 }
@@ -112,10 +125,14 @@ for (const note of walkNotes(VAULT)) {
 const previous = fs.existsSync(MANIFEST) ? JSON.parse(fs.readFileSync(MANIFEST, "utf8")) : []
 let changed = 0
 
-for (const [rel, src] of toCopy) {
+for (const [rel, { src, sources, parent }] of toCopy) {
   const dest = path.join(CONTENT, rel)
   let data = fs.readFileSync(src)
-  if (rel.endsWith(".md")) data = Buffer.from(linkCitations(data.toString("utf8")))
+  if (rel.endsWith(".md")) {
+    let text = linkCitations(data.toString("utf8"), sources)
+    if (parent) text = asAssetPage(text, parent)
+    data = Buffer.from(text)
+  }
   const same = fs.existsSync(dest) && fs.readFileSync(dest).equals(data)
   if (same) continue
   console.log(`+ ${rel}`)
